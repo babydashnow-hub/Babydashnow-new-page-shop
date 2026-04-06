@@ -1,0 +1,375 @@
+/* ==========================================================
+   BabyDashNow™ Hero Section
+   Premium, calm, local, trustworthy
+   Mobile-first · Production-ready
+   ========================================================== */
+
+/* ── Design tokens ── */
+:root {
+  /* Palette — warm, restrained, premium */
+  --bdn-bg:          #FAF8F5;   /* warm off-white */
+  --bdn-bg-subtle:   #F3F0EB;   /* slightly darker for frames */
+  --bdn-text:        #1A1A1A;   /* near-black, softer than pure black */
+  --bdn-text-muted:  #5C5650;   /* warm gray for secondary text */
+  --bdn-accent:      #2C5F4A;   /* deep calm green — trust, not urgency */
+  --bdn-accent-hover:#234D3B;
+  --bdn-border:      #E5E0DA;   /* subtle warm border */
+  --bdn-pill-bg:     #EEF5F1;   /* light green tint for delivery pill */
+  --bdn-pill-text:   #2C5F4A;
+  --bdn-white:       #FFFFFF;
+
+  /* Typography */
+  --bdn-font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --bdn-font-display: 'Lora', Georgia, 'Times New Roman', serif;
+
+  /* Spacing scale (8px base) */
+  --bdn-space-xs:  4px;
+  --bdn-space-sm:  8px;
+  --bdn-space-md:  16px;
+  --bdn-space-lg:  24px;
+  --bdn-space-xl:  32px;
+  --bdn-space-2xl: 48px;
+  --bdn-space-3xl: 64px;
+  --bdn-space-4xl: 96px;
+
+  /* Radius */
+  --bdn-radius-sm:   6px;
+  --bdn-radius-md:   10px;
+  --bdn-radius-lg:   16px;
+  --bdn-radius-pill: 100px;
+}
+
+/* ── Base reset (scoped) ── */
+.bdn-hero *,
+.bdn-hero *::before,
+.bdn-hero *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Hero section ── */
+.bdn-hero {
+  background-color: var(--bdn-bg);
+  padding: var(--bdn-space-2xl) var(--bdn-space-md);
+  font-family: var(--bdn-font-body);
+  color: var(--bdn-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.bdn-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bdn-space-xl);
+}
+
+/* ── Text content ── */
+.bdn-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bdn-space-lg);
+  max-width: 560px;
+}
+
+/* Eyebrow — locality-first */
+.bdn-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;    /* 13px */
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--bdn-accent);
+  text-transform: uppercase;
+}
+
+.bdn-hero__pin {
+  flex-shrink: 0;
+  color: var(--bdn-accent);
+}
+
+/* Headline */
+.bdn-hero__headline {
+  font-family: var(--bdn-font-display);
+  font-weight: 500;
+  font-size: clamp(1.875rem, 4.5vw, 3.25rem); /* 30px → 52px */
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--bdn-text);
+}
+
+.bdn-hero__br-desktop {
+  display: none;
+}
+
+/* Subheadline */
+.bdn-hero__subheadline {
+  font-size: clamp(1rem, 2vw, 1.1875rem);     /* 16px → 19px */
+  line-height: 1.55;
+  color: var(--bdn-text-muted);
+  max-width: 480px;
+}
+
+/* Delivery pill */
+.bdn-hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bdn-space-sm);
+  background-color: var(--bdn-pill-bg);
+  color: var(--bdn-pill-text);
+  font-size: 0.875rem;     /* 14px */
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--bdn-radius-pill);
+  border: 1px solid rgba(44, 95, 74, 0.1);
+  width: fit-content;
+  line-height: 1.4;
+}
+
+.bdn-hero__pill-icon {
+  flex-shrink: 0;
+}
+
+.bdn-hero__pill-note {
+  color: var(--bdn-text-muted);
+  font-weight: 400;
+}
+
+/* CTA row */
+.bdn-hero__cta-row {
+  display: flex;
+  gap: var(--bdn-space-md);
+  flex-wrap: wrap;
+  padding-top: var(--bdn-space-xs);
+}
+
+.bdn-hero__cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bdn-accent);
+  color: var(--bdn-white);
+  font-family: var(--bdn-font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 14px 32px;
+  border-radius: var(--bdn-radius-md);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  min-height: 48px;        /* touch-friendly */
+  width: 100%;
+  text-align: center;
+}
+
+.bdn-hero__cta-primary:hover {
+  background-color: var(--bdn-accent-hover);
+}
+
+.bdn-hero__cta-primary:active {
+  transform: scale(0.98);
+}
+
+.bdn-hero__cta-primary:focus-visible {
+  outline: 2px solid var(--bdn-accent);
+  outline-offset: 3px;
+}
+
+/* Micro-trust row */
+.bdn-hero__trust {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bdn-space-sm);
+  padding-top: var(--bdn-space-xs);
+  border-top: 1px solid var(--bdn-border);
+  padding-top: var(--bdn-space-lg);
+}
+
+.bdn-hero__trust-item {
+  display: flex;
+  align-items: center;
+  gap: var(--bdn-space-sm);
+  font-size: 0.875rem;
+  color: var(--bdn-text-muted);
+  line-height: 1.4;
+}
+
+.bdn-hero__trust-item svg {
+  flex-shrink: 0;
+  color: var(--bdn-accent);
+}
+
+/* ── Image ── */
+.bdn-hero__media {
+  width: 100%;
+}
+
+.bdn-hero__image-frame {
+  background-color: var(--bdn-bg-subtle);
+  border-radius: var(--bdn-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--bdn-border);
+  aspect-ratio: 4 / 5;
+}
+
+.bdn-hero__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* ── Sticky mobile CTA ── */
+.bdn-sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  padding: 12px var(--bdn-space-md) calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--bdn-white);
+  border-top: 1px solid var(--bdn-border);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.bdn-sticky-cta.is-visible {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.bdn-sticky-cta__button {
+  display: block;
+  width: 100%;
+  background-color: var(--bdn-accent);
+  color: var(--bdn-white);
+  font-family: var(--bdn-font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  padding: 14px 24px;
+  border-radius: var(--bdn-radius-md);
+  min-height: 48px;
+  transition: background-color 0.2s ease;
+}
+
+.bdn-sticky-cta__button:hover {
+  background-color: var(--bdn-accent-hover);
+}
+
+/* ===========================================================
+   RESPONSIVE — Tablet (600px+)
+   =========================================================== */
+@media (min-width: 600px) {
+  .bdn-hero {
+    padding: var(--bdn-space-3xl) var(--bdn-space-xl);
+  }
+
+  .bdn-hero__cta-primary {
+    width: auto;
+  }
+
+  .bdn-hero__trust {
+    flex-direction: row;
+    gap: var(--bdn-space-lg);
+  }
+
+  .bdn-hero__image-frame {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+/* ===========================================================
+   RESPONSIVE — Desktop (900px+)
+   =========================================================== */
+@media (min-width: 900px) {
+  .bdn-hero {
+    padding: var(--bdn-space-4xl) var(--bdn-space-xl);
+  }
+
+  .bdn-hero__inner {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--bdn-space-3xl);
+  }
+
+  .bdn-hero__content {
+    flex: 1;
+    min-width: 0;
+    gap: var(--bdn-space-lg);
+  }
+
+  .bdn-hero__br-desktop {
+    display: inline;
+  }
+
+  .bdn-hero__headline {
+    letter-spacing: -0.025em;
+  }
+
+  .bdn-hero__media {
+    flex: 0 0 45%;
+    max-width: 480px;
+  }
+
+  .bdn-hero__image-frame {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--bdn-radius-lg);
+  }
+
+  /* Hide sticky CTA on desktop — not needed */
+  .bdn-sticky-cta {
+    display: none;
+  }
+}
+
+/* ===========================================================
+   RESPONSIVE — Large desktop (1100px+)
+   =========================================================== */
+@media (min-width: 1100px) {
+  .bdn-hero__inner {
+    gap: var(--bdn-space-4xl);
+  }
+
+  .bdn-hero__media {
+    flex: 0 0 44%;
+    max-width: 520px;
+  }
+}
+
+/* ===========================================================
+   ACCESSIBILITY
+   =========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .bdn-hero__cta-primary,
+  .bdn-sticky-cta,
+  .bdn-sticky-cta__button {
+    transition: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Intentionally not included.
+     This hero targets WordPress embed.
+     Dark mode should be handled at the theme level.
+     Leaving this comment as a hook for future implementation. */
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  .bdn-hero__cta-primary {
+    border: 2px solid ButtonText;
+  }
+
+  .bdn-hero__pill {
+    border: 1px solid CanvasText;
+  }
+}
