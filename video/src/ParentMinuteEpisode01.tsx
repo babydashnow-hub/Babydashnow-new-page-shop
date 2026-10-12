@@ -1,10 +1,13 @@
 import React from "react";
 import { AbsoluteFill, Sequence } from "remotion";
 import { z } from "zod";
-import { ParentMinuteAudio, audioSchema, defaultAudio } from "./components/ParentMinuteAudio";
+import {
+  ParentMinuteAudio,
+  audioSchema,
+  defaultAudio,
+} from "./components/ParentMinuteAudio";
 import { ParentMinuteEndCard } from "./components/ParentMinuteEndCard";
 import { ParentMinuteScene } from "./components/ParentMinuteScene";
-import { ParentMinuteText } from "./components/ParentMinuteText";
 import { asset, ASSET_FILES } from "./parent-minute/assets";
 import { COLORS, VIDEO } from "./parent-minute/theme";
 
@@ -12,7 +15,9 @@ export const parentMinuteEpisode01Schema = z.object({
   audio: audioSchema,
 });
 
-export type ParentMinuteEpisode01Props = z.infer<typeof parentMinuteEpisode01Schema>;
+export type ParentMinuteEpisode01Props = z.infer<
+  typeof parentMinuteEpisode01Schema
+>;
 
 export const parentMinuteEpisode01Defaults: ParentMinuteEpisode01Props = {
   audio: defaultAudio,
@@ -20,6 +25,9 @@ export const parentMinuteEpisode01Defaults: ParentMinuteEpisode01Props = {
 
 const DISSOLVE = 9;
 
+// Scenes 1–4 carry their wording inside the supplied images, so no text is
+// overlaid on them. Only the end card sets type in code.
+//
 // Scene starts follow the brief exactly. Each scene runs a little past its
 // slot so the next one can dissolve in on top of it.
 const SCENES = {
@@ -55,22 +63,7 @@ export const ParentMinuteEpisode01: React.FC<ParentMinuteEpisode01Props> = ({
             ],
             driftY: [0, -14],
           }}
-          textPlacement="upper"
-        >
-          <ParentMinuteText variant="title" enterAt={4} exitAt={38}>
-            Parent Minute
-          </ParentMinuteText>
-          <ParentMinuteText variant="byline" enterAt={12} exitAt={38} opacity={0.85}>
-            by BabyDashNow™
-          </ParentMinuteText>
-          <ParentMinuteText
-            variant="headline"
-            enterAt={48}
-            style={{ position: "absolute", top: 260, left: 96, right: 96 }}
-          >
-            Before you head out...
-          </ParentMinuteText>
-        </ParentMinuteScene>
+        />
       </Sequence>
 
       {/* SCENE 2 — 0:03–0:07 */}
@@ -92,17 +85,7 @@ export const ParentMinuteEpisode01: React.FC<ParentMinuteEpisode01Props> = ({
               [54, 64],
             ],
           }}
-          textPlacement="upper"
-        >
-          <ParentMinuteText
-            variant="headline"
-            enterAt={16}
-            exitAt={106}
-            style={{ fontSize: 64 }}
-          >
-            A quick diaper-bag check.
-          </ParentMinuteText>
-        </ParentMinuteScene>
+        />
       </Sequence>
 
       {/* SCENE 3 — 0:07–0:13 */}
@@ -124,18 +107,7 @@ export const ParentMinuteEpisode01: React.FC<ParentMinuteEpisode01Props> = ({
               [50, 62],
             ],
           }}
-          textPlacement="upper"
-        >
-          <ParentMinuteText
-            variant="headline"
-            enterAt={22}
-            exitAt={164}
-            fadeInFrames={30}
-            style={{ maxWidth: 860 }}
-          >
-            Check the things you never want to discover missing later.
-          </ParentMinuteText>
-        </ParentMinuteScene>
+        />
       </Sequence>
 
       {/* SCENE 4 — 0:13–0:16 */}
@@ -158,12 +130,7 @@ export const ParentMinuteEpisode01: React.FC<ParentMinuteEpisode01Props> = ({
             ],
             driftY: [0, -18],
           }}
-          textPlacement="upper"
-        >
-          <ParentMinuteText variant="headline" enterAt={14} exitAt={78}>
-            A practical reminder for parents.
-          </ParentMinuteText>
-        </ParentMinuteScene>
+        />
       </Sequence>
 
       {/* SCENE 5 — 0:16–0:20 · End card */}
@@ -178,7 +145,10 @@ export const ParentMinuteEpisode01: React.FC<ParentMinuteEpisode01Props> = ({
         />
       </Sequence>
 
-      <ParentMinuteAudio audio={audio} durationInFrames={VIDEO.durationInFrames} />
+      <ParentMinuteAudio
+        audio={audio}
+        durationInFrames={VIDEO.durationInFrames}
+      />
     </AbsoluteFill>
   );
 };

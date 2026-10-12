@@ -30,7 +30,8 @@ type Props = {
   /** Length of the scene including its overlap with the next one. */
   durationInFrames: number;
   camera: CameraMove;
-  textPlacement: TextPlacement;
+  /** Only needed when overlaying text (children). */
+  textPlacement?: TextPlacement;
   children?: React.ReactNode;
 };
 
@@ -42,7 +43,7 @@ export const ParentMinuteScene: React.FC<Props> = ({
   dissolveIn = 0,
   durationInFrames,
   camera,
-  textPlacement,
+  textPlacement = "upper",
   children,
 }) => {
   const frame = useCurrentFrame();
@@ -53,8 +54,16 @@ export const ParentMinuteScene: React.FC<Props> = ({
   });
 
   const scale = interpolate(progress, [0, 1], camera.scale);
-  const fx = interpolate(progress, [0, 1], [camera.focus[0][0], camera.focus[1][0]]);
-  const fy = interpolate(progress, [0, 1], [camera.focus[0][1], camera.focus[1][1]]);
+  const fx = interpolate(
+    progress,
+    [0, 1],
+    [camera.focus[0][0], camera.focus[1][0]],
+  );
+  const fy = interpolate(
+    progress,
+    [0, 1],
+    [camera.focus[0][1], camera.focus[1][1]],
+  );
 
   // Keep any vertical drift inside the slack that the current scale creates,
   // so the image always covers the full 1080x1920 frame.
@@ -69,7 +78,10 @@ export const ParentMinuteScene: React.FC<Props> = ({
 
   const opacity =
     dissolveIn > 0
-      ? interpolate(frame, [0, dissolveIn], [0, 1], { ...clamp, easing: EASE_FADE })
+      ? interpolate(frame, [0, dissolveIn], [0, 1], {
+          ...clamp,
+          easing: EASE_FADE,
+        })
       : 1;
 
   const imageStyle: React.CSSProperties = {
@@ -89,26 +101,28 @@ export const ParentMinuteScene: React.FC<Props> = ({
       >
         <ParentMinuteImage src={src} label={label} style={imageStyle} />
       </AbsoluteFill>
-      <Scrim placement={textPlacement} />
-      <AbsoluteFill
-        style={{
-          padding: `${SAFE_ZONE.top + 40}px ${SAFE_ZONE.side}px ${SAFE_ZONE.bottom + 40}px`,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          justifyContent:
-            textPlacement === "upper"
-              ? "flex-start"
-              : textPlacement === "lower"
-                ? "flex-end"
-                : "center",
-          gap: 18,
-          textShadow: "0 2px 28px rgba(28, 27, 24, 0.35)",
-        }}
-      >
-        {children}
-      </AbsoluteFill>
+      {children ? <Scrim placement={textPlacement} /> : null}
+      {children ? (
+        <AbsoluteFill
+          style={{
+            padding: `${SAFE_ZONE.top + 40}px ${SAFE_ZONE.side}px ${SAFE_ZONE.bottom + 40}px`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            justifyContent:
+              textPlacement === "upper"
+                ? "flex-start"
+                : textPlacement === "lower"
+                  ? "flex-end"
+                  : "center",
+            gap: 18,
+            textShadow: "0 2px 28px rgba(28, 27, 24, 0.35)",
+          }}
+        >
+          {children}
+        </AbsoluteFill>
+      ) : null}
     </AbsoluteFill>
   );
 };
