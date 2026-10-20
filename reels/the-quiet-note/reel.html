@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Quiet Note Reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=block" rel="stylesheet">
+<style>
+  :root {
+    --ivory: #F5F1E8;
+    --green: #356B16;
+    --ink: #1C1B18;
+  }
+  html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
+  body.render { background: var(--ivory); }
+  #fit { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #stage {
+    position: relative; width: 1080px; height: 1920px; flex: none;
+    background: var(--ivory); overflow: hidden; transform-origin: center center;
+    font-family: Inter, sans-serif; color: var(--ink);
+  }
+  .abs { position: absolute; }
+  #vignette { inset: 0; background:
+      radial-gradient(120% 80% at 50% 42%, rgba(255,253,247,.55) 0%, rgba(255,253,247,0) 55%),
+      linear-gradient(180deg, rgba(232,224,208,0) 55%, rgba(232,224,208,.45) 100%); }
+  #grain { inset: 0; width: 1080px; height: 1920px; opacity: .55; mix-blend-mode: multiply; }
+
+  /* Scene 1 */
+  #label { top: 286px; left: 0; width: 1080px; text-align: center; font-size: 24px; letter-spacing: .34em;
+           font-weight: 600; text-indent: .34em; }
+  #label .rule { display: block; width: 46px; height: 1px; background: rgba(28,27,24,.25); margin: 22px auto 0; }
+  .serif { font-family: 'Playfair Display', serif; font-weight: 400; }
+  .line { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; will-change: transform, opacity, filter; }
+  .bl { display: inline-block; width: 0; height: 0; vertical-align: baseline; }
+  .p { opacity: 0; }
+  #s1a, #s1b { font-size: 86px; line-height: 1; }
+  #s1a { top: 820px; }
+  #s1b { top: 930px; font-style: italic; }
+
+  /* Scene 2 caption */
+  #title { top: 316px; font-size: 70px; letter-spacing: .11em; text-indent: .11em; }
+  #sub { top: 422px; font-size: 29px; color: rgba(28,27,24,.62); letter-spacing: .01em; }
+
+  /* Scene 3 lines */
+  .nl { font-size: 56px; line-height: 1; }
+  #n1 { top: 300px; } #n2 { top: 374px; } #n3 { top: 448px; }
+
+  /* Scene 4 */
+  #ask { top: 356px; font-size: 66px; line-height: 1; }
+  #ask em { font-style: italic; }
+
+  /* Viewport */
+  #vpShadow { left: 110px; top: 540px; width: 860px; height: 920px; border-radius: 34px;
+              box-shadow: 0 2px 4px rgba(60,48,28,.05), 0 30px 70px rgba(60,48,28,.13); background: transparent; }
+  #vp { left: 110px; top: 540px; width: 860px; height: 920px; border-radius: 34px; overflow: hidden;
+        background: #F6F3EC; transform-origin: 50% 50%; }
+  #pg { left: 0; top: 0; width: 860px; will-change: transform; }
+  #hdr { left: 0; top: 0; width: 860px; }
+  #spot { inset: 0; background: rgba(245,241,232,.66); }
+  #vpEdge { inset: 0; border-radius: 34px; box-shadow: inset 0 0 0 1.5px rgba(28,27,24,.10); pointer-events: none; }
+
+  #lines { left: 0; top: 0; width: 1080px; height: 1920px; overflow: visible; }
+
+  /* Final */
+  #logo { left: 152px; top: 887px; width: 783px; height: 175.5px; }
+  #logo img { position: absolute; left: 0; top: 0; width: 783px; height: 175.5px; }
+  #ringWrap { position: absolute; left: 0; top: 0; width: 783px; height: 175.5px; transform-origin: 67.95px 73.35px; }
+  #ring { -webkit-mask-image: conic-gradient(from 0deg at 67.95px 73.35px, #000 0deg, rgba(0,0,0,.28) 170deg, rgba(0,0,0,.28) 200deg, #000 360deg);
+          mask-image: conic-gradient(from 0deg at 67.95px 73.35px, #000 0deg, rgba(0,0,0,.28) 170deg, rgba(0,0,0,.28) 200deg, #000 360deg); }
+  #wordClip { position: absolute; left: 0; top: 0; width: 783px; height: 175.5px; overflow: hidden; }
+  #fTitle { top: 720px; font-size: 54px; letter-spacing: .16em; text-indent: .16em; }
+  #fRule { left: 516px; top: 812px; width: 48px; height: 1px; background: rgba(28,27,24,.22); }
+  #fUrl { top: 1150px; font-size: 30px; font-weight: 500; letter-spacing: .06em; color: var(--green); }
+
+  #dot { left: 0; top: 0; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--green); will-change: transform; }
+
+  /* preview controls */
+  #ui { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 12px; align-items: center; padding: 10px 16px;
+        background: rgba(17,17,17,.85); color: #eee; font: 13px Inter, sans-serif; }
+  #ui button { background: #2a2a2a; color: #eee; border: 1px solid #444; border-radius: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  #ui input { flex: 1; accent-color: #356B16; }
+  body.render #ui { display: none; }
+</style>
+</head>
+<body>
+<div id="fit">
+<div id="stage">
+  <canvas id="grain" class="abs" width="1080" height="1920"></canvas>
+  <div id="vignette" class="abs"></div>
+
+  <div id="label" class="abs"><span id="labelText">BABYDASHNOW</span><span class="rule"></span></div>
+  <div id="s1a" class="line serif">Some parents carry</div>
+  <div id="s1b" class="line serif">more than we can see<i class="bl" id="b1"></i><span class="p" id="p1">.</span></div>
+
+  <div id="title" class="line serif">THE QUIET NOTE</div>
+  <div id="sub" class="line">A BabyDashNow™ community care initiative</div>
+
+  <div id="n1" class="line serif nl">No cost<i class="bl" id="bn1"></i><span class="p" id="pn1">.</span></div>
+  <div id="n2" class="line serif nl">No story required<i class="bl" id="bn2"></i><span class="p" id="pn2">.</span></div>
+  <div id="n3" class="line serif nl">Nothing expected back<i class="bl" id="bn3"></i><span class="p" id="pn3">.</span></div>
+
+  <div id="ask" class="line serif">Did someone <em>come to mind?</em></div>
+
+  <div id="vpShadow" class="abs"></div>
+  <div id="vp" class="abs">
+    <img id="pg" class="abs" src="page.jpg" alt="">
+    <img id="hdr" class="abs" src="header.png" alt="">
+    <div id="spot" class="abs"></div>
+    <div id="vpEdge" class="abs"></div>
+  </div>
+
+  <svg id="lines" class="abs" viewBox="0 0 1080 1920">
+    <circle id="orbit" cx="540" cy="1000" r="90" fill="none" stroke="#1C1B18" stroke-opacity=".32" stroke-width="1.6"
+            transform="rotate(-90 540 1000)"/>
+  </svg>
+
+  <div id="fTitle" class="line serif">THE QUIET NOTE</div>
+  <div id="fRule" class="abs"></div>
+  <div id="logo" class="abs">
+    <div id="ringWrap"><img id="ring" src="logo-ring.png" alt=""></div>
+    <img id="ldot" src="logo-dot.png" alt="">
+    <div id="wordClip"><img id="word" src="logo-word.png" alt="BabyDashNow™ — We show up when it matters"></div>
+  </div>
+  <div id="fUrl" class="line">babydashnow.com/the-quiet-note</div>
+
+  <div id="dot" class="abs"></div>
+</div>
+</div>
+<div id="ui"><button id="play">Pause</button><input id="scrub" type="range" min="0" max="15" step="0.0333" value="0"><span id="tc">0.00s</span></div>
+
+<script>
+const DUR = 15;
+const $ = id => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const io = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;      // easeInOutCubic
+const out = x => 1 - Math.pow(1 - x, 3);                                         // easeOutCubic
+const sine = x => -(Math.cos(Math.PI * x) - 1) / 2;
+const lerp = (a, b, p) => a + (b - a) * p;
+const bez = (p0, c, p1, p) => [ (1-p)*(1-p)*p0[0] + 2*(1-p)*p*c[0] + p*p*p1[0], (1-p)*(1-p)*p0[1] + 2*(1-p)*p*c[1] + p*p*p1[1] ];
+
+// Viewport / page geometry (page strip px -> stage px)
+const VP = { x: 110, y: 540, w: 860, h: 920 };
+const K = 860 / 1206;
+const HDR_NATURAL = 109;              // where the header sits in the page strip
+const EYEBROW = [56, 399];            // page's own eyebrow dot, strip coords
+const C = [540, 1000], R0 = 90;       // orbit centre & radius
+const EY_STAGE0 = [VP.x + EYEBROW[0] * K, VP.y + EYEBROW[1] * K];
+const R_EY = Math.hypot(EY_STAGE0[0] - C[0], EY_STAGE0[1] - C[1]);
+const TH_EY = Math.atan2(EY_STAGE0[1] - C[1], EY_STAGE0[0] - C[0]) * 180 / Math.PI + 360; // ~204deg
+const TH0 = TH_EY - 90;               // where the dot meets the orbit
+// Final logo: rendered at 0.9 of source; dot centre in stage coords
+const LOGO = { x: 152, y: 887, s: 0.9 };
+const LOGO_DOT = [LOGO.x + 75.5 * LOGO.s, LOGO.y + 81.5 * LOGO.s];
+
+// Scroll schedule (strip px)
+function scrollAt(t) {
+  if (t < 6.0) return lerp(0, 18, sine(seg(t, 4.4, 6.0)));
+  if (t < 10.0) return lerp(18, 192, io(seg(t, 6.0, 7.5)));
+  return lerp(192, 936, io(seg(t, 10.0, 11.5)));
+}
+const eyebrowStage = t => [VP.x + EYEBROW[0] * K, VP.y + (EYEBROW[1] - scrollAt(t)) * K];
+
+let A = {};   // measured anchors
+function measure() {
+  const st = $('stage').getBoundingClientRect();
+  const sc = st.width / 1080;
+  const anchor = (b, p) => {
+    const rb = $(b).getBoundingClientRect(), rp = $(p).getBoundingClientRect();
+    const fs = parseFloat(getComputedStyle($(p)).fontSize);
+    return [ (rp.left + rp.width / 2 - st.left) / sc, (rb.top - st.top) / sc - fs * 0.115 ];
+  };
+  A.p1 = anchor('b1', 'p1'); A.pn1 = anchor('bn1', 'pn1'); A.pn2 = anchor('bn2', 'pn2'); A.pn3 = anchor('bn3', 'pn3');
+  const lr = $('labelText').getBoundingClientRect();
+  A.label = [ (lr.left - st.left) / sc - 22, (lr.top + lr.height / 2 - st.top) / sc ];
+}
+
+function reveal(el, p, rise = 22, blur = 8) { show(el, p, 0, rise, blur); }
+function show(el, inP, outP, rise = 22, blur = 8) {
+  const e = out(inP), x = io(outP);
+  el.style.opacity = e * (1 - x);
+  el.style.transform = `translateY(${(1 - e) * rise}px)`;
+  const b = (1 - e) * blur + x * 6;
+  el.style.filter = b > 0.01 ? `blur(${b}px)` : 'none';
+}
+
+function dotPos(t) {
+  // Scene 1: appears beside the BABYDASHNOW name, glides down to become the period after "see"
+  if (t < 1.25) return { p: A.label, s: 1 };
+  if (t < 2.75) {
+    const p = io(seg(t, 1.25, 2.25));
+    return { p: bez(A.label, [A.label[0] - 40, A.p1[1] - 260], A.p1, p), s: 1 };
+  }
+  // Scene 2: into the thin circular line, then out with the iris to the page's own eyebrow dot
+  const start = [C[0] + R0 * Math.cos(TH0 * Math.PI / 180), C[1] + R0 * Math.sin(TH0 * Math.PI / 180)];
+  if (t < 3.25) { const p = io(seg(t, 2.75, 3.25)); return { p: bez(A.p1, [A.p1[0] - 40, start[1] + 30], start, p), s: 1 }; }
+  if (t < 4.0) { const th = (TH0 + 360 * io(seg(t, 3.25, 4.0))) * Math.PI / 180; return { p: [C[0] + R0 * Math.cos(th), C[1] + R0 * Math.sin(th)], s: 1 }; }
+  if (t < 4.8) {
+    const p = io(seg(t, 4.0, 4.8));
+    const r = lerp(R0, R_EY, p), th = (TH0 + 360 + 90 * p) * Math.PI / 180;
+    return { p: [C[0] + r * Math.cos(th), C[1] + r * Math.sin(th)], s: 1 };
+  }
+  // Rests on the page's own dot, moving with the page
+  if (t < 6.95) return { p: eyebrowStage(t), s: 1 };
+  // Scene 3: lifts off and becomes the period of each line in turn
+  if (t < 8.05) { const a = eyebrowStage(6.95); const p = io(seg(t, 6.95, 7.65)); return { p: bez(a, [a[0] + 60, A.pn1[1] + 40], A.pn1, p), s: 1 }; }
+  if (t < 8.95) { const p = io(seg(t, 8.05, 8.6)); return { p: bez(A.pn1, [lerp(A.pn1[0], A.pn2[0], .5), A.pn1[1] + 20], A.pn2, p), s: 1 }; }
+  if (t < 10.6) { const p = io(seg(t, 8.95, 9.5)); return { p: bez(A.pn2, [lerp(A.pn2[0], A.pn3[0], .5), A.pn2[1] + 20], A.pn3, p), s: 1 }; }
+  // Scene 4: guides the eye down to the nomination buttons
+  const btn = [VP.x - 30, VP.y + (1668 - 936) * K];
+  if (t < 12.7) { const p = io(seg(t, 10.6, 11.7)); return { p: bez(A.pn3, [A.pn3[0] + 40, 760], btn, p), s: 1 }; }
+  // Scene 5: settles into the centre of the official logo
+  const p = io(seg(t, 12.7, 13.5));
+  return { p: bez(btn, [btn[0] - 10, LOGO_DOT[1] + 60], LOGO_DOT, p), s: lerp(1, 36 / 16, io(seg(t, 13.1, 13.5))) };
+}
+
+function render(t) {
+  // Scene 1 ----------------------------------------------------------------
+  const lab = $('label');
+  lab.style.opacity = out(seg(t, 0.35, 1.0)) * (1 - io(seg(t, 2.65, 3.05)));
+  lab.style.transform = `translateY(${(1 - out(seg(t, 0.35, 1.0))) * 10}px)`;
+  show($('s1a'), seg(t, 0.95, 1.85), seg(t, 2.65, 3.1));
+  show($('s1b'), seg(t, 1.45, 2.35), seg(t, 2.65, 3.1));
+
+  // Scene 2 ----------------------------------------------------------------
+  const orbit = $('orbit');
+  const circ = 2 * Math.PI;
+  let r = R0, draw = io(seg(t, 3.25, 4.0)), oo = 1;
+  if (t >= 4.0) r = t < 4.8 ? lerp(R0, R_EY, io(seg(t, 4.0, 4.8))) : lerp(R_EY, 660, out(seg(t, 4.8, 5.3)));
+  oo = (t < 3.25 ? 0 : 1) * (1 - io(seg(t, 4.45, 5.2)));
+  orbit.setAttribute('r', r);
+  orbit.setAttribute('transform', `rotate(${TH0} 540 1000)`);
+  orbit.style.strokeDasharray = `${circ * r}`;
+  orbit.style.strokeDashoffset = `${circ * r * (1 - draw)}`;
+  orbit.style.opacity = oo;
+
+  const vp = $('vp'), vs = $('vpShadow');
+  const cr = t < 4.0 ? R0 * out(seg(t, 3.55, 4.0)) : (t < 4.8 ? lerp(R0, R_EY, io(seg(t, 4.0, 4.8))) : lerp(R_EY, 660, out(seg(t, 4.8, 5.3))));
+  const vpIn = seg(t, 3.55, 4.0);
+  const vpOut = io(seg(t, 12.7, 13.3));
+  vp.style.opacity = vpIn * (1 - vpOut);
+  vp.style.clipPath = t < 5.3 ? `circle(${cr}px at ${C[0] - VP.x}px ${C[1] - VP.y}px)` : 'none';
+  vs.style.opacity = io(seg(t, 4.7, 5.4)) * (1 - vpOut);
+  const vscale = (1 + 0.012 * sine(seg(t, 10.2, 12.2))) * (1 - 0.03 * vpOut);
+  vp.style.transform = vs.style.transform = `scale(${vscale})`;
+
+  const sc = scrollAt(t);
+  $('pg').style.transform = `translateY(${-sc * K}px)`;
+  const hdr = $('hdr');
+  hdr.style.display = sc > HDR_NATURAL ? 'block' : 'none';
+
+  // focus band: dim everything outside it (paragraph in scene 3, buttons in scene 4)
+  let band, spotA;
+  if (t < 10.0) { band = [760, 1090]; spotA = io(seg(t, 6.8, 7.5)); }
+  else {
+    const p = io(seg(t, 10.0, 11.5));
+    band = [lerp(760, 1470, p), lerp(1090, 1870, p)]; spotA = 1;
+  }
+  const y0 = (band[0] - sc) * K, y1 = (band[1] - sc) * K;
+  const m = `linear-gradient(to bottom, #000 0px, #000 ${y0 - 30}px, transparent ${y0 + 10}px, transparent ${y1 - 10}px, #000 ${y1 + 30}px, #000 100%)`;
+  const spot = $('spot');
+  spot.style.webkitMaskImage = spot.style.maskImage = m;
+  spot.style.opacity = spotA;
+
+  show($('title'), seg(t, 4.55, 5.25), seg(t, 6.0, 6.5), 18, 8);
+  show($('sub'), seg(t, 4.85, 5.55), seg(t, 6.0, 6.45), 14, 4);
+  // Scene 3 ----------------------------------------------------------------
+  show($('n1'), seg(t, 7.0, 7.7), seg(t, 10.0, 10.5));
+  show($('n2'), seg(t, 7.9, 8.6), seg(t, 10.05, 10.55));
+  show($('n3'), seg(t, 8.8, 9.5), seg(t, 10.1, 10.6));
+  // the typed period appears only once the green dot has moved on
+  $('pn1').style.opacity = io(seg(t, 8.15, 8.55));
+  $('pn2').style.opacity = io(seg(t, 9.05, 9.45));
+
+  // Scene 4 ----------------------------------------------------------------
+  show($('ask'), seg(t, 10.55, 11.35), seg(t, 12.6, 13.1));
+
+  // Scene 5 ----------------------------------------------------------------
+  const ringIn = io(seg(t, 13.25, 13.95));
+  const rw = $('ringWrap');
+  rw.style.opacity = ringIn;
+  rw.style.transform = `rotate(${Math.max(0, t - 13.25) * 32}deg) scale(${lerp(0.94, 1, ringIn)})`;
+  $('ldot').style.opacity = t >= 13.5 ? 1 : 0;           // the travelling dot hands over to the logo's own dot
+  const wIn = out(seg(t, 13.5, 14.15));
+  const w = $('word');
+  w.style.opacity = wIn;
+  w.style.transform = `translateY(${(1 - wIn) * 36}px)`;
+  reveal($('fTitle'), seg(t, 13.6, 14.2), 14, 6);
+  $('fRule').style.opacity = io(seg(t, 13.8, 14.3));
+  reveal($('fUrl'), seg(t, 13.8, 14.4), 12, 4);
+
+  // The dot ----------------------------------------------------------------
+  const d = dotPos(t);
+  const dot = $('dot');
+  dot.style.transform = `translate(${d.p[0]}px, ${d.p[1]}px) scale(${d.s})`;
+  dot.style.opacity = out(seg(t, 0.0, 0.5)) * (t >= 13.5 ? 0 : 1);
+}
+
+function grain() {
+  const c = $('grain'), g = c.getContext('2d');
+  const img = g.createImageData(1080, 1920);
+  let s = 1234567;
+  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = 200 + rnd() * 55;
+    img.data[i] = v; img.data[i + 1] = v * 0.985; img.data[i + 2] = v * 0.96; img.data[i + 3] = 22;
+  }
+  g.putImageData(img, 0, 0);
+}
+
+function fitStage() {
+  const ui = document.body.classList.contains('render') ? 0 : 52;
+  const s = Math.min(innerWidth / 1080, (innerHeight - ui) / 1920);
+  $('stage').style.transform = `scale(${s})`;
+  $('fit').style.bottom = ui + 'px';
+}
+
+const params = new URLSearchParams(location.search);
+window.ready = (async () => {
+  if (params.has('render')) document.body.classList.add('render');
+  fitStage();
+  await document.fonts.ready;
+  await Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => i.onload = i.onerror = r)));
+  const tf = $('stage').style.transform; $('stage').style.transform = 'none';
+  measure();
+  $('stage').style.transform = tf;
+  grain();
+  render(0);
+  return true;
+})();
+window.render = render;
+
+if (!params.has('render')) {
+  addEventListener('resize', fitStage);
+  let playing = true, t0 = null, tNow = 0;
+  const scrub = $('scrub'), tc = $('tc'), btn = $('play');
+  btn.onclick = () => { playing = !playing; btn.textContent = playing ? 'Pause' : 'Play'; t0 = null; };
+  scrub.oninput = () => { tNow = +scrub.value; render(tNow); tc.textContent = tNow.toFixed(2) + 's'; };
+  window.ready.then(() => {
+    const tick = ts => {
+      if (playing) {
+        if (t0 === null) t0 = ts - tNow * 1000;
+        tNow = ((ts - t0) / 1000) % DUR;
+        render(tNow); scrub.value = tNow; tc.textContent = tNow.toFixed(2) + 's';
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+</script>
+</body>
+</html>
