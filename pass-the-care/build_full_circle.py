@@ -28,7 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 A = os.path.join(HERE, "assets")
 OUT = os.path.join(HERE, "out")
 OUTRO = os.path.join(A, "outro", "BabyDashNow_Official_Outro_Final.mp4")
-SQUIRREL = os.path.join(A, "squirrel", "squirrel_original.png")
+SQUIRREL = os.path.join(A, "squirrel", "squirrel_original.webp")
 LORA = os.path.join(A, "fonts", "Lora-Variable-latin.woff2")
 INTER_MED = os.path.join(A, "fonts", "Inter-Medium.otf")
 INTER_SEMI = os.path.join(A, "fonts", "Inter-SemiBold.otf")
@@ -39,37 +39,39 @@ SR = 48000
 
 # ------------------------------------------------------------------ colour
 GREEN = (59, 110, 17)        # the official outro's own dot/ring value (#3B6E11)
+TEXT_GREEN = (45, 97, 17)    # live PASS THE CARE page text green, sampled from the screen recording (#2D6111)
 INK = (14, 14, 10)           # the official outro's wordmark ink
 SOFT_INK = (74, 74, 66)
-IVORY = (245, 241, 232)      # UNVERIFIED - replace with value sampled from the live page
+IVORY = (245, 243, 237)      # live PASS THE CARE hero panel, sampled from the screen recording (#F5F3ED)
 WHITE = (255, 255, 255)      # official outro background
 
 # ------------------------------------------------------------------ copy (live page wording, pending screenshot check)
 LABEL = "PASS THE CARE™"
 HEADLINE = "Give $5. Get $5."
-COND_1 = ["They save $5 on their", "first $40+ order."]
-COND_2 = ["You earn $5 once their", "order is completed."]
-CLOSING = ["A little help,", "passed forward."]
+COND_1 = ["They save $5 on their", "first order of $40+", "in merchandise."]
+COND_2 = ["You earn a $5 BabyDashNow", "reward when their qualifying", "order is completed."]
+TAG_A, TAG_B = "A little help, ", "passed forward."
 CTA_B = "Discover PASS THE CARE™"
 
 # ------------------------------------------------------------------ layout
-CX, CY, R = 540, 960, 290      # circle shares the outro dot's centre (540, 960)
+CX, CY, R = 540, 980, 345
+LAND = (540, 960)              # the outro dot's centre
 DOT_R = 22.0                   # outro dot radius
 LINE_W = 2.2
-SQ_HEIGHT = 440                # squirrel display height (px)
-SQ_ANCHOR = (0.5, 0.5)         # fraction of artwork that sits on the 6 o'clock point; set from the real art
-LABEL_Y, HEAD_Y = 300, 360
-TEXT_CY = 905                  # centre of the text block inside the circle
+SQ_HEIGHT = 440                # displayed height of the squirrel figure (px)
+SQ_ANCHOR_SRC = (914, 770)     # acorn centre in the source artwork; sits on the 6 o'clock point
+LABEL_Y, HEAD_Y, TAG_Y = 296, 352, 500
+TEXT_CY = 915                  # centre of the text block inside the circle
 CTA_Y = 1236                   # Variant B, under the outro (outro content ends y~1096)
 
 # ------------------------------------------------------------------ timing (frames)
-T_FWD = (0, 75)        # dot travels 6 -> 3 -> 12 o'clock, already moving at frame 0
-T_PAUSE = (75, 96)     # one slow pulse at 12 o'clock
-T_RET = (96, 268)      # 12 -> 9 -> ~7 o'clock, the circle stays open
-T_FADE = (268, 284)    # story elements leave
-T_BG = (272, 299)      # ivory lifts to the outro's white
-T_LAND = (270, 297)    # dot glides to (540, 960) and settles to nothing
-TXT = {"c1": (8, 112), "c2": (114, 214), "close": (216, 268)}
+T_FWD = (0, 96)        # dot travels 6 -> 3 -> 12 o'clock, already moving at frame 0
+T_PAUSE = (96, 124)     # one slow pulse at 12 o'clock
+T_RET = (124, 276)     # 12 -> 9 -> ~7 o'clock, the circle stays open
+T_FADE = (276, 290)    # story elements leave
+T_BG = (280, 299)      # ivory lifts to the outro's white
+T_LAND = (278, 297)    # dot glides to (540, 960) and settles to nothing
+TXT = {"c1": (6, 140), "c2": (142, 284)}
 CTA_IN = 390
 THETA0, THETA_PAUSE, THETA_END = 14.0, 180.0, 328.0
 
@@ -107,8 +109,8 @@ def dot_state(f):
     x, y = ring_xy(th)
     if f >= T_LAND[0]:
         p = ease(prog(f, T_LAND))
-        x, y = x + (CX - x) * p, y + (CY - y) * p
-        r = DOT_R * (1 - ease(prog(f, (284, 297))))
+        x, y = x + (LAND[0] - x) * p, y + (LAND[1] - y) * p
+        r = DOT_R * (1 - ease(prog(f, (288, 298))))
         return x, y, r, th
     return x, y, DOT_R, th
 
@@ -168,14 +170,20 @@ def appear(f, span, fin=12, fout=10, rise=12):
 def load_squirrel(layout_test):
     if os.path.exists(SQUIRREL):
         im = Image.open(SQUIRREL)
+        im.load()
         if im.mode != "RGBA" or im.getchannel("A").getextrema()[0] == 255:
             sys.exit("Squirrel source has no transparency; supply the original transparent artwork.")
-        bbox = im.getchannel("A").getbbox()
-        im = im.crop(bbox)
-        if im.height < SQ_HEIGHT:
-            sys.exit(f"Squirrel source is {im.height}px tall; at least {SQ_HEIGHT}px needed to avoid upscaling.")
-        s = SQ_HEIGHT / im.height
-        return im.resize((round(im.width * s), SQ_HEIGHT), Image.LANCZOS), False
+        # measure the figure (ignoring faint alpha noise) but never crop or alter the artwork itself
+        a = np.array(im.getchannel("A"))
+        ys = np.where((a > 30).any(axis=1))[0]
+        fig_top, fig_h = int(ys.min()), int(ys.max() - ys.min() + 1)
+        s = SQ_HEIGHT / fig_h
+        if s > 1:
+            sys.exit(f"Squirrel figure is {fig_h}px tall; upscaling refused.")
+        size = (round(im.width * s), round(im.height * s))           # one uniform scale factor
+        out = im.resize(size, Image.LANCZOS)
+        out.info.update(scale=s, anchor=(SQ_ANCHOR_SRC[0] * s, SQ_ANCHOR_SRC[1] * s))
+        return out, False
     if not layout_test:
         sys.exit("Missing original squirrel artwork at assets/squirrel/squirrel_original.png - "
                  "review render refused. Use --layout-test for a labelled placeholder.")
@@ -184,6 +192,7 @@ def load_squirrel(layout_test):
     d.rounded_rectangle((0, 0, 359, SQ_HEIGHT - 1), 40, fill=(200, 196, 186, 255))
     d.text((180, SQ_HEIGHT / 2), "SQUIRREL\nSOURCE\nPENDING", font=font(INTER_SEMI, 34),
            fill=(90, 90, 84, 255), anchor="mm", align="center")
+    ph.info.update(scale=1.0, anchor=(180, 0))
     return ph, True
 
 
@@ -232,9 +241,12 @@ def story_frame(f, R_):
     (bx, by), line, dot = vector_layer(f, ui)
     fr.alpha_composite(solid(GREEN, line), (bx, by))                      # trail behind the squirrel
     sq = R_["sq"]
-    ax, ay = SQ_ANCHOR
-    sx, sy = int(round(CX - sq.width * ax)), int(round(CY + R - sq.height * ay))
-    paste(fr, sq, sx + sq.width / 2, sy, ui)                              # squirrel sits on the circle
+    ax, ay = R_["sq_anchor"]
+    sx, sy = int(round(CX - ax)), int(round(CY + R - ay))                 # acorn on the 6 o'clock point
+    if ui >= 1:
+        fr.alpha_composite(sq, (sx, sy))                                  # unaltered pixels
+    else:
+        paste(fr, sq, sx + sq.width / 2, sy, ui)
     fr.alpha_composite(solid(GREEN, dot), (bx, by))                       # dot in front
 
     # label + headline: visible at frame 0
@@ -246,7 +258,8 @@ def story_frame(f, R_):
         lx, ly = CX + 14 - lw / 2 - 22, LABEL_Y + R_["label"].height / 2
         d.ellipse((lx - 7, ly - 7, lx + 7, ly + 7), fill=c)
     paste(fr, R_["head"], CX, HEAD_Y, ui)
-    for key, img in (("c1", R_["c1"]), ("c2", R_["c2"]), ("close", R_["close"])):
+    paste(fr, R_["tag"], CX, TAG_Y, ui)
+    for key, img in (("c1", R_["c1"]), ("c2", R_["c2"])):
         a, dy = appear(f, TXT[key])
         paste(fr, img, CX, TEXT_CY - img.height / 2, a * ui, dy)
     return fr
@@ -254,14 +267,18 @@ def story_frame(f, R_):
 
 def build_resources(layout_test):
     sq, placeholder = load_squirrel(layout_test)
+    tf = font(LORA, 48, b"Medium")
+    ta = text_img([TAG_A], tf, INK + (255,)); tb = text_img([TAG_B], tf, TEXT_GREEN + (255,))
+    tag = Image.new("RGBA", (ta.width + tb.width - 8, max(ta.height, tb.height)), (0, 0, 0, 0))
+    tag.alpha_composite(ta, (0, 0)); tag.alpha_composite(tb, (ta.width - 8, 0))
     return {
-        "sq": sq, "placeholder": placeholder,
-        "label": text_img([LABEL], font(INTER_SEMI, 28), GREEN + (255,), tracking=4.5),
-        "head": text_img([HEADLINE], font(LORA, 112, b"SemiBold"), INK + (255,)),
-        "c1": text_img(COND_1, font(LORA, 46, b"Regular"), SOFT_INK + (255,)),
-        "c2": text_img(COND_2, font(LORA, 46, b"Regular"), SOFT_INK + (255,)),
-        "close": text_img(CLOSING, font(LORA, 52, b"Medium"), GREEN + (255,)),
-        "cta": text_img([CTA_B], font(INTER_MED, 34), GREEN + (255,)),
+        "sq": sq, "placeholder": placeholder, "sq_anchor": sq.info["anchor"],
+        "label": text_img([LABEL], font(INTER_SEMI, 28), TEXT_GREEN + (255,), tracking=4.5),
+        "head": text_img([HEADLINE], font(LORA, 112, b"Bold"), TEXT_GREEN + (255,)),
+        "tag": tag,
+        "c1": text_img(COND_1, font(LORA, 44, b"Regular"), SOFT_INK + (255,), leading=1.3),
+        "c2": text_img(COND_2, font(LORA, 44, b"Regular"), SOFT_INK + (255,), leading=1.3),
+        "cta": text_img([CTA_B], font(INTER_MED, 36), TEXT_GREEN + (255,)),
     }
 
 
@@ -328,7 +345,8 @@ def main():
     test = R_["placeholder"]
 
     def outro_frames():
-        p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", OUTRO, "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+        p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", OUTRO, "-vf", "scale=in_color_matrix=bt709:in_range=tv",
+                              "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
                              stdout=subprocess.PIPE)
         while True:
             b = p.stdout.read(W * H * 3)
@@ -360,7 +378,7 @@ def main():
     tag = f"PassTheCare_FullCircle_REVIEW_v1_Variant{args.variant}"
     silent = os.path.join(OUT, tag + "_silent.mp4")
     enc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
-                            "-r", str(FPS), "-i", "-", "-c:v", "libx264", "-profile:v", "high", "-crf", "14",
+                            "-r", str(FPS), "-i", "-", "-vf", "scale=out_color_matrix=bt709:out_range=tv", "-c:v", "libx264", "-profile:v", "high", "-crf", "14",
                             "-preset", "slow", "-pix_fmt", "yuv420p", "-colorspace", "bt709", "-color_primaries",
                             "bt709", "-color_trc", "bt709", "-movflags", "+faststart", silent], stdin=subprocess.PIPE)
     count = 0
