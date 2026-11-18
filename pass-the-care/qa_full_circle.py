@@ -109,7 +109,10 @@ res["squirrel_source"] = dict(file=b.SQUIRREL.split("/")[-1], size=src.size, mod
 res["squirrel_scale_xy"] = (round(sq.width / src.width, 5), round(sq.height / src.height, 5))
 QS = getattr(b, "QA_SQ_FRAME", 0)
 f0 = b.story_frame(QS, R_).convert("RGB")
-ax, ay = R_["sq_anchor"]; sx, sy = int(round(b.CX - ax)), int(round(b.CY + b.R - ay))
+if hasattr(b, "qa_sq_pos"):
+    sx, sy = b.qa_sq_pos(R_)
+else:
+    ax, ay = R_["sq_anchor"]; sx, sy = int(round(b.CX - ax)), int(round(b.CY + b.R - ay))
 ref = Image.new("RGBA", sq.size, b.IVORY + (255,)); ref.alpha_composite(sq)
 crop = np.array(f0.crop((sx, sy, sx + sq.width, sy + sq.height))).astype(int)
 refa = np.array(ref.convert("RGB")).astype(int)
