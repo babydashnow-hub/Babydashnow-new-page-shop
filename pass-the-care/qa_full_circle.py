@@ -7,9 +7,13 @@ import sys
 import numpy as np
 from PIL import Image
 
-import build_full_circle as b
+import os
+import importlib
+b = importlib.import_module(os.environ.get("FC_BUILD", "build_full_circle"))
+b = getattr(b, "b", b)  # v2 patches the base module in place
 
-TAG = "PassTheCare_FullCircle_REVIEW_v1_VariantB"
+TAG = b.TAG_PREFIX + "_VariantB"
+ST = b.STORY
 MP4 = f"{b.OUT}/{TAG}.mp4"
 W, H = b.W, b.H
 
@@ -59,14 +63,14 @@ out = list(frames(MP4))
 res["frame_count"] = len(out)
 cta_top, cta_bot = b.CTA_Y - 10, b.CTA_Y + 70
 mask = np.ones((H, W), bool); mask[cta_top:cta_bot, :] = False
-ps = [psnr(out[300 + k][mask], outro[k][mask]) for k in range(180)]
+ps = [psnr(out[ST + k][mask], outro[k][mask]) for k in range(180)]
 res["outro_psnr_outside_cta_min_mean"] = (round(min(ps), 2), round(float(np.mean(ps)), 2))
-ps_pre = [psnr(out[300 + k], outro[k]) for k in range(90)]
+ps_pre = [psnr(out[ST + k], outro[k]) for k in range(90)]
 res["outro_psnr_full_frame_before_cta_min"] = round(min(ps_pre), 2)
 rows = [np.where((255 - fr.min(axis=2)) > 12)[0] for fr in outro]
 lowest = max(r.max() for r in rows if len(r))
 res["outro_lowest_content_row"] = int(lowest)
-cta_rows = np.where((np.abs(out[479].astype(int) - outro[179].astype(int)).sum(2) > 120).any(axis=1))[0]
+cta_rows = np.where((np.abs(out[-1].astype(int) - outro[179].astype(int)).sum(2) > 120).any(axis=1))[0]
 res["cta_rows"] = (int(cta_rows.min()), int(cta_rows.max())) if len(cta_rows) else None
 res["cta_clearance_px"] = int(cta_rows.min() - lowest) if len(cta_rows) else None
 blank = [i for i, fr in enumerate(out) if fr.std() < 0.5 and fr.mean() < 20]
@@ -79,11 +83,12 @@ def dot_colour(fr, x, y):
     return tuple(int(c) for c in np.median(fr[y - 6:y + 7, x - 6:x + 7].reshape(-1, 3), axis=0))
 
 
-x, y, r, _ = b.dot_state(150)
-res["story_dot_rgb_f150"] = dot_colour(out[150], int(round(x)), int(round(y)))
-res["outro_dot_rgb_f319_in_export"] = dot_colour(out[319], 540, 960)
+QD = getattr(b, "QA_DOT_FRAME", 150)
+x, y, r, _ = b.dot_state(QD)
+res[f"story_dot_rgb_f{QD}"] = dot_colour(out[QD], int(round(x)), int(round(y)))
+res["outro_dot_rgb_outro_f19_in_export"] = dot_colour(out[ST + 19], 540, 960)
 res["outro_dot_rgb_f19_in_original"] = dot_colour(outro[19], 540, 960)
-lx, ly, lr, _ = b.dot_state(297)
+lx, ly, lr, _ = b.dot_state(ST - 3)
 res["landing_point_f297"] = (round(lx, 1), round(ly, 1), round(lr, 2))
 
 # ---- safe zones (story frames): rows/cols that differ from background
@@ -92,7 +97,7 @@ def content_box(fr, bg):
     ys, xs = np.where(d)
     return int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())
 
-boxes = [content_box(out[f], b.IVORY) for f in (0, 60, 110, 200, 260)]
+boxes = [content_box(out[f], b.IVORY) for f in getattr(b, "QA_BOX_FRAMES", (0, 60, 110, 200, 260))]
 res["story_content_bbox_union"] = (min(bx[0] for bx in boxes), min(bx[1] for bx in boxes),
                                    max(bx[2] for bx in boxes), max(bx[3] for bx in boxes))
 
@@ -102,13 +107,14 @@ sq = R_["sq"]
 src = Image.open(b.SQUIRREL)
 res["squirrel_source"] = dict(file=b.SQUIRREL.split("/")[-1], size=src.size, mode=src.mode)
 res["squirrel_scale_xy"] = (round(sq.width / src.width, 5), round(sq.height / src.height, 5))
-f0 = b.story_frame(0, R_).convert("RGB")
+QS = getattr(b, "QA_SQ_FRAME", 0)
+f0 = b.story_frame(QS, R_).convert("RGB")
 ax, ay = R_["sq_anchor"]; sx, sy = int(round(b.CX - ax)), int(round(b.CY + b.R - ay))
 ref = Image.new("RGBA", sq.size, b.IVORY + (255,)); ref.alpha_composite(sq)
 crop = np.array(f0.crop((sx, sy, sx + sq.width, sy + sq.height))).astype(int)
 refa = np.array(ref.convert("RGB")).astype(int)
 dot_free = np.ones(crop.shape[:2], bool)
-dx, dy = b.dot_state(0)[0] - sx, b.dot_state(0)[1] - sy
+dx, dy = b.dot_state(QS)[0] - sx, b.dot_state(QS)[1] - sy
 yy, xx = np.mgrid[:crop.shape[0], :crop.shape[1]]
 dot_free &= (xx - dx) ** 2 + (yy - dy) ** 2 > (b.DOT_R + 4) ** 2
 opaque = np.array(sq.getchannel("A")) >= 250
@@ -140,18 +146,20 @@ mix = np.frombuffer(subprocess.run(["ffmpeg", "-v", "error", "-i", f"{b.OUT}/{TA
 orig_full = b.outro_audio()
 res["outro_audio_tail_trimmed_samples_peak"] = (len(orig_full) - 6 * b.SR, round(float(np.abs(orig_full[6 * b.SR:]).max()), 6))
 orig = orig_full[:6 * b.SR]
-seg = mix[10 * b.SR:10 * b.SR + len(orig)]
+o0 = int(ST / 30 * b.SR)
+seg = mix[o0:o0 + len(orig)]
 g = np.dot(seg, orig) / np.dot(orig, orig)
 resid = seg - g * orig
 res["outro_audio_gain_x"] = round(float(g), 4)
 res["outro_audio_residual_dB_rel"] = round(float(20 * np.log10(np.sqrt(np.mean(resid ** 2)) / np.sqrt(np.mean((g * orig) ** 2)))), 1)
 dec = np.frombuffer(subprocess.run(["ffmpeg", "-v", "error", "-i", MP4, "-f", "f32le", "-ac", "1", "-ar", "48000", "-"],
                                    capture_output=True).stdout, np.float32).astype(float)
-win = dec[int(11.5 * b.SR):int(12.3 * b.SR)]
+w0 = ST / 30 + 1.5
+win = dec[int(w0 * b.SR):int((w0 + 0.8) * b.SR)]
 env = np.abs(win)
 on = np.argmax(env > 0.2 * env.max())
-res["chime_onset_s_in_export"] = round(11.5 + on / b.SR, 4)
-res["chime_expected_s"] = round(300 / 30 + 57 / 30, 4)
+res["chime_onset_s_in_export"] = round(w0 + on / b.SR, 4)
+res["chime_expected_s"] = round(ST / 30 + 57 / 30, 4)
 
 for k, val in res.items():
     print(f"{k}: {val}")

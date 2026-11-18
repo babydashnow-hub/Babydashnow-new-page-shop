@@ -35,6 +35,7 @@ INTER_SEMI = os.path.join(A, "fonts", "Inter-SemiBold.otf")
 
 W, H, FPS = 1080, 1920, 30
 N, STORY = 480, 300
+TAG_PREFIX = "PassTheCare_FullCircle_REVIEW_v1"
 SR = 48000
 
 # ------------------------------------------------------------------ colour
@@ -375,7 +376,7 @@ def main():
         print("Layout-test stills written to", d)
         return
 
-    tag = f"PassTheCare_FullCircle_REVIEW_v1_Variant{args.variant}"
+    tag = f"{TAG_PREFIX}_Variant{args.variant}"
     silent = os.path.join(OUT, tag + "_silent.mp4")
     enc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
                             "-r", str(FPS), "-i", "-", "-vf", "scale=out_color_matrix=bt709:out_range=tv", "-c:v", "libx264", "-profile:v", "high", "-crf", "14",
