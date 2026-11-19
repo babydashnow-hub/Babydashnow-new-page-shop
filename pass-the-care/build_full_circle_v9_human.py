@@ -31,7 +31,7 @@ import build_full_circle_v6_audio as va
 import audio_ab_v6_bridge as ab
 
 b = v.b
-FOOTAGE = "/root/.claude/uploads/533057bf-068f-5dc4-985d-7dcc3d40595d/ef01b5a9-BabyDashNow_Pexels_Mom_Opening_0p5-3p5.mp4"
+FOOTAGE = os.path.join(b.A, "footage_pexels_7279098_0p5-3p5.mp4")   # supplied edit of Pexels video 7279098, source 0.5-3.5 s
 LOGO = os.path.join(b.A, "logo", "babydashnow-logo.png")
 FPS, SR = b.FPS, b.SR
 
