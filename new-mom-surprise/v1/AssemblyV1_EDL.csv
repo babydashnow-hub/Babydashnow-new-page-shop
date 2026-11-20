@@ -1,0 +1,11 @@
+shot,source_id,source_file,source_in_s,source_out_s,duration_s,record_in_frame,record_out_frame_excl,record_in_tc,record_out_tc,purpose
+1,D,d3ff4db1-IMG_7306.mov,3.40,4.60,1.20,0,36,00:00:00:00,00:00:01:06,"Curiosity: an empty box"
+2,C,76696015-IMG_7306.mov,0.00,2.40,2.40,36,108,00:00:01:06,00:00:03:18,"Hands begin preparing it (paper fill)"
+3,E,569b4059-IMG_7308.mov,2.60,5.20,2.60,108,186,00:00:03:18,00:00:06:06,"Swaddle placed and pressed in"
+4,F,0f6549da-IMG_7314.mov,1.50,3.40,1.90,186,243,00:00:06:06,00:00:08:03,"Pacifiers placed"
+5,G,4a5690ce-IMG_7315.mov,2.60,4.70,2.10,243,306,00:00:08:03,00:00:10:06,"Lotion laid in"
+6,H,d696e046-IMG_7319.mov,1.80,3.80,2.00,306,366,00:00:10:06,00:00:12:06,"Tissue folded over the gifts"
+7,I,83b39bbf-IMG_7321.mov,0.70,2.60,1.90,366,423,00:00:12:06,00:00:14:03,"BabyDashNow card placed"
+8,J,ecacd315-IMG_7325.mov,1.40,3.50,2.10,423,486,00:00:14:03,00:00:16:06,"Sealed: 'We show up when it matters'"
+9,K,26d3beb0-IMG_7326.mov,4.60,5.80,1.20,486,522,00:00:16:06,00:00:17:12,"Departure: the gift in the car"
+10,P,66ad8ba5-IMG_7356.mov,0.00,4.20,4.20,522,648,00:00:17:12,00:00:21:18,"Delivered: waiting at her door"
