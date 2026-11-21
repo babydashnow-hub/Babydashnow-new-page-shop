@@ -1,0 +1,12 @@
+shot,source_id,source_file,first_source_pts_s,last_source_pts_s,frames,record_in_frame,record_out_frame_excl,record_in_s,record_out_s,purpose
+1,A,6a2af4f0-E6A28B63-3737-4971-8332-26A1812ABEFC.mp4,8.4000,10.3667,60,0,60,0.000,2.000,"A hand writes to someone"
+2,A,6a2af4f0-E6A28B63-3737-4971-8332-26A1812ABEFC.mp4,10.4667,12.2667,55,60,115,2.000,3.833,"Heading completed and revealed"
+3,D,d3ff4db1-IMG_7306.mov,3.4000,4.3667,30,115,145,3.833,4.833,"An empty box, waiting"
+4,C,76696015-IMG_7306.mov,0.0000,1.7800,55,145,200,4.833,6.667,"Hands shape a soft bed of paper"
+5,E,569b4059-IMG_7308.mov,3.0000,4.9667,60,200,260,6.667,8.667,"The swaddle pressed gently in"
+6,G,4a5690ce-IMG_7315.mov,2.8000,4.3667,48,260,308,8.667,10.267,"Lotion laid in"
+7,H,d696e046-IMG_7319.mov,1.8000,3.5667,54,308,362,10.267,12.067,"Tissue folded over"
+8,I,83b39bbf-IMG_7321.mov,0.7000,2.3667,51,362,413,12.067,13.767,"The BabyDashNow card"
+9,J,ecacd315-IMG_7325.mov,1.8017,3.4700,51,413,464,13.767,15.467,"Sealed: We show up when it matters"
+10,K,26d3beb0-IMG_7326.mov,4.7000,5.6667,30,464,494,15.467,16.467,"On its way"
+11,P,66ad8ba5-IMG_7356.mov,0.0000,4.9667,150,494,644,16.467,21.467,"Waiting at her door"

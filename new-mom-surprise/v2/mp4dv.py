@@ -184,7 +184,7 @@ def _replace(parent, typ, new):
     parent.children.append(new)
 
 
-def inject(path_in, path_out, rpu_for_frame, dovi=(8, 7, 4), extra_boxes=()):
+def inject(path_in, path_out, rpu_for_frame, dovi=(8, 7, 4), extra_boxes=(), hvcc_extra_nals=()):
     data, boxes, moov, tabs = read_file(path_in)
     samples = []                                                    # (time_sec, track_idx, sample_idx, bytes)
     for ti, t in enumerate(tabs):
@@ -218,6 +218,10 @@ def inject(path_in, path_out, rpu_for_frame, dovi=(8, 7, 4), extra_boxes=()):
             fmt = entry[4:8]
             # sample entry: 8 hdr + 78 visual sample entry fields, then child boxes
             kids = parse_boxes(entry, 8 + 78, entry_size)
+            if hvcc_extra_nals:
+                for k in kids:
+                    if k.typ == b"hvcC":
+                        k.payload = hvcc_add_nals(k.payload, hvcc_extra_nals)
             drop = {b"dvcC", b"dvvC"} | {b.typ for b in extra_boxes}
             kids = [k for k in kids if k.typ not in drop]
             kids.append(dvvc_box(*dovi))
@@ -259,3 +263,41 @@ def sample_entry_box(path, typ):
         if k.typ == typ:
             return k
     return None
+
+
+def hvcc_arrays(h):
+    pos = 22; n = h[pos]; pos += 1; arrs = []
+    for _ in range(n):
+        hdr = h[pos]; cnt = struct.unpack(">H", h[pos + 1:pos + 3])[0]; pos += 3; nl = []
+        for _ in range(cnt):
+            l = struct.unpack(">H", h[pos:pos + 2])[0]; nl.append(h[pos + 2:pos + 2 + l]); pos += 2 + l
+        arrs.append([hdr, nl])
+    return h[:22], arrs
+
+
+def hvcc_add_nals(h, nals_to_add):
+    """Append NAL units (e.g. an Ambient Viewing Environment prefix-SEI) to the matching hvcC arrays."""
+    head, arrs = hvcc_arrays(h)
+    for nal in nals_to_add:
+        t = (nal[0] >> 1) & 0x3F
+        a = next((a for a in arrs if a[0] & 0x3F == t), None)
+        if a is None:
+            arrs.append([t, [nal]])
+        elif nal not in a[1]:
+            a[1].append(nal)
+    out = bytearray(head) + bytes([len(arrs)])
+    for hdr, nl in arrs:
+        out += bytes([hdr]) + struct.pack(">H", len(nl))
+        for nal in nl:
+            out += struct.pack(">H", len(nal)) + nal
+    return bytes(out)
+
+
+def source_hvcc_sei(path, payload_type=0x94):
+    _, _, _, tabs = read_file(path)
+    v = next(t for t in tabs if t["handler"] == b"vide")
+    p = v["stbl"].find(b"stsd").payload
+    es = struct.unpack(">I", p[8:12])[0]
+    h = next(k for k in parse_boxes(p[8:8 + es], 8 + 78, es) if k.typ == b"hvcC").payload
+    _, arrs = hvcc_arrays(h)
+    return [n for hdr, nl in arrs for n in nl if (n[0] >> 1) & 0x3F == 39 and n[2] == payload_type]

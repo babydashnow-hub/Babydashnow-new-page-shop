@@ -230,3 +230,40 @@ if __name__ == "__main__":
                      lambda i: tab[i][2],
                      extra_boxes=[mp4dv.sample_entry_box(U + EDL[2][2], b"amve")])
         print("injected", len(tab), "RPUs")
+
+
+# ---------------------------------------------------------------- exact frame list (as actually produced)
+def actual_shot_pts():
+    """Source pts of every frame each trim actually emits (ffmpeg showinfo, same trim as the render).
+    For the 29.97 fps shot the fps filter's choice is reproduced by nearest-timestamp selection."""
+    import re
+    res = []
+    for _, sid, f, k0, n, sfps, _ in EDL:
+        t0 = (k0 - 0.5) / sfps
+        if sfps == 30:
+            t1 = (k0 + n - 0.5) / sfps
+            log = subprocess.run(["ffmpeg", "-v", "info", "-i", U + f, "-map", "0:v:0", "-an", "-vf",
+                                  f"trim=start={t0:.6f}:end={t1:.6f},showinfo", "-f", "null", "-"],
+                                 capture_output=True, text=True).stderr
+            res.append([float(x) for x in re.findall(r"pts_time:(-?[0-9.]+)", log)])
+        else:
+            log = subprocess.run(["ffmpeg", "-v", "info", "-i", U + f, "-map", "0:v:0", "-an", "-vf",
+                                  f"trim=start={t0:.6f},showinfo", "-f", "null", "-"],
+                                 capture_output=True, text=True).stderr
+            src = [float(x) for x in re.findall(r"pts_time:(-?[0-9.]+)", log)]
+            base = src[0]
+            res.append([min(src, key=lambda p: abs((p - base) - j / 30)) for j in range(n)])
+    return res
+
+
+def rpu_table_exact():
+    cache, table, shots = {}, [], actual_shot_pts()
+    for (_, sid, f, *_), pts_list in zip(EDL, shots):
+        if f not in cache:
+            cache[f] = mp4dv.source_rpus_ff(U + f)
+        r = cache[f]
+        for p in pts_list:
+            k = min(r, key=lambda q: abs(q - p))
+            assert abs(k - p) < 0.002, (sid, p, k)
+            table.append((sid, p, r[k]))
+    return table, [len(s) for s in shots]

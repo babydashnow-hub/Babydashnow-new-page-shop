@@ -78,29 +78,30 @@ def run(master, size=(2160, 3840)):
     rep["duration"] = pr["format"]["duration"]
     n, rpu, amb = frame_side(master)
     rep["frames_decoded"], rep["frames_with_rpu"], rep["frames_with_ambient"] = n, rpu, amb
-    tab = b.rpu_table()
+    import pickle
+    tab, counts = pickle.load(open(os.path.join(b.OUT, "rpu_table.pkl"), "rb"))
+    starts = np.cumsum([0] + counts)
     out = output_rpus(master)
     rep["rpu_identical_to_source_frame"] = sum(1 for i in range(min(len(out), len(tab))) if out[i] == tab[i][2])
-    # picture fidelity: per shot, middle frame vs its exact source frame (outside text layers)
+    rep["frames_per_shot"] = counts
     shots = []
     for i, (shot, sid, f, k0, cnt, sfps, _) in enumerate(b.EDL):
-        j = cnt // 2; tl = int(b.STARTS[i]) + j
-        src_t = (k0 + (j if sfps == 30 else j * sfps / 30)) / sfps
-        o = luma(master, W, H, sel=tl)
+        tl = int(starts[i]) + counts[i] // 2
+        src_t = tab[tl][1]
         if sid == "A":
             s = luma(U + f, 1440, 2560, ss=src_t)
             o = luma(master, 1440, 2560, sel=tl, vf_extra="scale=1440:2560:flags=lanczos")
+        elif (W, H) == (2160, 3840):
+            s = luma(U + f, W, H, ss=src_t); o = luma(master, W, H, sel=tl)
         else:
-            s = luma(U + f, 2160, 3840, ss=src_t)
-            if (W, H) != (2160, 3840):
-                s = luma(U + f, W, H, ss=src_t, vf_extra=f"scale={W}:{H}:flags=lanczos")
+            s = luma(U + f, W, H, ss=src_t, vf_extra=f"scale={W}:{H}:flags=lanczos"); o = luma(master, W, H, sel=tl)
         mask = np.ones_like(o, dtype=bool)
         for key, (fa, fb) in b.TEXT.items():
-            if fa <= tl < fb:
+            if fa <= tl <= fb + 2:
                 hh = o.shape[0]
-                band = {"open": (0.10, 0.22), "close": (0.62, 0.72), "sign": (0.60, 0.78)}[key]
+                band = {"open": (0.10, 0.22), "close": (0.62, 0.72), "sign": (0.60, 0.80)}[key]
                 mask[int(band[0] * hh):int(band[1] * hh), :] = False
-        shots.append(dict(shot=shot, src=sid, timeline_frame=tl,
+        shots.append(dict(shot=shot, src=sid, timeline_frame=tl, source_pts=src_t,
                           mean_diff=round(float(o[mask].mean() - s[mask].mean()), 2),
                           p99_diff=round(float(np.percentile(o[mask], 99) - np.percentile(s[mask], 99)), 2),
                           ssim=round(ssim(np.where(mask, o, 0), np.where(mask, s, 0)), 4)))
