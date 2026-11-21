@@ -3,3 +3,5 @@ __pycache__/
 pass-the-care/assets/originals/
 pass-the-care/review/brand_reel_publication/*.zip
 new-mom-surprise/v1/*.zip
+new-mom-surprise/v2/out/
+new-mom-surprise/v2/__pycache__/
